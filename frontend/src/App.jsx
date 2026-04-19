@@ -20,18 +20,22 @@ function App() {
     }
 
     const formData = new FormData();
-    files.forEach((file) => formData.append("files", file));
+    files.forEach(file => formData.append("files", file));
 
     try {
       setLoading(true);
 
-      const res = await fetch("https://script-analyzer-backend.onrender.com", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        "https://script-analyzer-backend.onrender.com/compare",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const result = await res.json();
       setData(result);
+
     } catch (err) {
       console.error(err);
       alert("Error connecting to backend");
@@ -47,7 +51,7 @@ function App() {
         🎬 SRT Script Analyzer
       </h1>
 
-      {/* Drag & Drop */}
+      {/* Upload Box */}
       <div
         className={`w-full max-w-xl p-8 border-2 border-dashed rounded-2xl text-center transition
           ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-white"}`}
@@ -63,7 +67,7 @@ function App() {
         }}
       >
         <p className="mb-4 text-gray-600">
-          Drag & drop .srt files here or click to select
+          Drag & drop .srt files here or select
         </p>
 
         <input
@@ -71,7 +75,6 @@ function App() {
           multiple
           accept=".srt"
           onChange={(e) => handleFiles(e.target.files)}
-          className="mb-4"
         />
 
         {files.length > 0 && (
@@ -97,52 +100,35 @@ function App() {
       {/* Loader */}
       {loading && (
         <p className="mt-4 text-gray-600 animate-pulse">
-          ⏳ Analyzing scripts...
+          ⏳ Analyzing...
         </p>
       )}
 
-      {/* Results */}
+      {/* RESULTS */}
       {data && (
         <div className="mt-10 w-full max-w-3xl">
-          
-          <h2 className="text-lg font-medium mb-2">
-            📊 Mode: <span className="font-semibold">{data.mode}</span>
-          </h2>
 
           <h2 className="text-2xl font-bold text-green-600 mb-6">
-            🏆 Best Script: {data.best_file}
+            🏆 Best File: {data.best_file?.filename || "N/A"}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            {data.results.map((r, i) => (
+            {(data.files || []).map((r, i) => (
               <div
                 key={i}
-                className={`p-5 rounded-xl shadow bg-white transition hover:scale-[1.02]
-                  ${r.filename === data.best_file
-                    ? "border-2 border-green-500"
-                    : "border border-gray-200"}`}
+                className="p-5 rounded-xl shadow bg-white border"
               >
                 <h3 className="font-semibold text-lg mb-2">
-                  {i + 1}. {r.filename}
+                  📄 {r.filename}
                 </h3>
 
-                <p className="text-sm mb-1">
-                  <b>Score:</b> {r.score}
-                </p>
-
-                <p className="text-sm text-gray-600 italic mb-3">
-                  {r.reason}
-                </p>
-
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <p><b>Words:</b> {r.details.word_count}</p>
-                  <p><b>Unique:</b> {r.details.unique_words}</p>
-                  <p><b>Diversity:</b> {r.details.diversity}</p>
-                  <p><b>Sentence Len:</b> {r.details.avg_sentence_length}</p>
-                </div>
+                <p><b>Words:</b> {r.analysis.word_count}</p>
+                <p><b>Unique:</b> {r.analysis.unique_words}</p>
+                <p><b>Spam Score:</b> {r.analysis.spam_score}</p>
               </div>
             ))}
           </div>
+
         </div>
       )}
     </div>
