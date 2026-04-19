@@ -25,7 +25,7 @@ function App() {
     try {
       setLoading(true);
 
-      const res = await fetch("http://127.0.0.1:8000/compare", {
+      const res = await fetch("https://script-analyzer-backend.onrender.com", {
         method: "POST",
         body: formData,
       });
